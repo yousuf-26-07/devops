@@ -41,7 +41,22 @@ pipeline {
                 }
             }
         }
-        
+    stage('Push Docker Image') {
+    steps {
+        script {
+            echo "Pushing Docker Image to Docker Hub..."
+
+            withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDS_ID, usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                sh """
+                echo \$DOCKERHUB_PASS | docker login -u ${DOCKER_HUB_USER} --password-stdin
+                docker push ${DOCKER_HUB_USER}/${DOCKER_IMAGE}:${TAG}
+                docker push ${DOCKER_HUB_USER}/${DOCKER_IMAGE}:latest
+                docker logout
+                """
+            }
+        }
+    }
+}
         
     }
 
@@ -62,3 +77,6 @@ pipeline {
         }
     }
 }
+
+
+
